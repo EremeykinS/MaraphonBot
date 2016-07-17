@@ -41,7 +41,7 @@ def chat(bot, update):
         text = "Пока категории вопросов не созданы. Вы можете ввести вопрос самостоятельно"
         bot.sendMessage(user_id, text=text, reply_markup=main_kbd)
     elif answer == 'Моя программа':
-        text = "Подождите, какая нахуй программа? Вы же даже не знаете, что такое марафон. Сначала узнайте, а потом уже приходите"
+        text = "Подождите, какая еще программа? Вы же даже не знаете, что такое марафон. Сначала узнайте, а потом уже спрашивайте про программу!"
         bot.sendMessage(user_id, text=text, reply_markup=main_kbd)
     elif answer == 'INFO':
         text = "Появление информации ожидается в скором времени"
@@ -50,12 +50,16 @@ def chat(bot, update):
         actions = dict()
         client = Wit(access_token=wit_token, actions=actions)
         client_answer = client.message(answer)
-        if client_answer['entities']['intent'][0]['confidence'] < 0.6:
+        try:
+            if client_answer['entities']['intent'][0]['confidence'] < 0.6:
+                text = "К сожалению, ответ на этот вопрос мне не известен. Попробуйте другой вопрос."
+                bot.sendMessage(user_id, text=text, reply_markup=main_kbd)
+            else:
+                codec = client_answer['entities']['intent'][0]['value']
+                text = dictionary[codec]
+                bot.sendMessage(user_id, text=text, reply_markup=main_kbd)
+        except KeyError:
             text = "К сожалению, ответ на этот вопрос мне не известен. Попробуйте другой вопрос."
-            bot.sendMessage(user_id, text=text, reply_markup=main_kbd)
-        else:
-            codec = client_answer['entities']['intent'][0]['value']
-            text = dictionary[codec]
             bot.sendMessage(user_id, text=text, reply_markup=main_kbd)
         
 
